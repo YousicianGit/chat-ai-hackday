@@ -1,3 +1,58 @@
+# ChatGPT Slack Bot
+## The original README can be found below, here are instructions for our custom deployment.
+
+## Development
+
+The instuctions in the original readme are good to go. A couple of extra useful things:
+
+1. For local usage, Slack Bolt is used with socket mode.
+    1. Prepare the environment
+
+    ```sh
+    $ python3 -m venv .venv 
+    $ source .venv/bin/activate
+    $ pip install -r requirements.txt
+    ```
+
+    2. Set the env variables (prepare the `env.sh` file and **do not set** `SLACK_CLIENT_ID`,
+        `SLACK_CLIENT_SECRET`, `SLACK_SIGNING_SECRET`, otherwise Slack Bolt will not
+    use socket mode):
+    ```sh
+    $ source env.sh
+    ```
+
+    3. Start the app
+    ```sh
+    $ python main.py
+    ```
+
+2. For prod usage, the CloudFront deployment hasn't succeeded so the bot is deployed in our k8s
+   cluster without any persistent storage (thus it doesn't provide home page and
+   fancy configuration page, but at least it works). `prod` tag is used by default.
+
+    1. Build the image with 
+
+    ```sh
+    $ ./authenticate_ecr.sh
+    $ docker build . -t 781124778026.dkr.ecr.eu-west-1.amazonaws.com/yap/hackday/ai:prod --platform amd64
+    $ docker push 781124778026.dkr.ecr.eu-west-1.amazonaws.com/yap/hackday/ai:prod
+    ```
+
+    2. Use `chat-gpt-bot-env.yaml` to create the secrets (if they do not
+       already exist)
+
+    ```sh
+    $ kubectl -n hackday apply -f chat-gpt-bot-env.yaml
+    ```
+    
+    3. Use `chat-gpt-bot-pod.yaml` to deploy the pod itself
+
+    ```sh
+    $ kubectl -n hackday apply -f chat-gpt-bot-pod.yaml
+    ```
+
+
+# The Original README
 # ChatGPT in Slack
 
 Introducing a transformative app for Slack users, specifically designed to enhance your communication with [ChatGPT](https://openai.com/blog/chatgpt)!

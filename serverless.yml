@@ -3,7 +3,7 @@ service: slack-chat-gpt-bot
 provider:
   name: aws
   runtime: python3.9
-  region: us-east-1
+  region: eu-west-1
   iam:
     role:
       statements:

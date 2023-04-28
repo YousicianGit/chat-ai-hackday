@@ -1,3 +1,5 @@
+.env.sh
+.chat-gpt-bot-env.yaml
 build/
 dist/
 .eggs/

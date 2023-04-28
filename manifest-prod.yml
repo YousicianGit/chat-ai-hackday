@@ -20,7 +20,6 @@ oauth_config:
       - groups:history
       - im:history
       - mpim:history
-      - chat:write.public
       - chat:write
       - users:read
 settings:
