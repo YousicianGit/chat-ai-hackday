@@ -6,6 +6,9 @@ from openai.error import Timeout
 from slack_bolt import App, Ack, BoltContext, BoltResponse
 from slack_bolt.request.payload_utils import is_event
 from slack_sdk.web import WebClient
+import openai
+import requests
+import tempfile
 
 from app.env import (
     OPENAI_TIMEOUT_SECONDS,
@@ -115,23 +118,41 @@ def respond_to_app_mention(
             messages=messages,
             user=context.user_id,
         )
-        steam = start_receiving_openai_response(
-            openai_api_key=openai_api_key,
-            model=context["OPENAI_MODEL"],
-            messages=messages,
-            user=context.user_id,
-        )
-        consume_openai_stream_to_write_reply(
-            client=client,
-            wip_reply=wip_reply,
-            context=context,
-            user_id=user_id,
-            messages=messages,
-            steam=steam,
-            timeout_seconds=OPENAI_TIMEOUT_SECONDS,
-            translate_markdown=TRANSLATE_MARKDOWN,
-        )
 
+        if "[image]" in messages[-1]["content"]:
+            image_url = openai.Image.create(
+                prompt=messages[-1]["content"],
+                n=1,
+                size="256x256",
+                response_format="url",
+            )["data"][0]["url"]
+
+            with tempfile.NamedTemporaryFile(suffix=".jpg") as f:
+                f.write(requests.get(image_url).content)
+                response = client.files_upload(
+                    channels=context.channel_id,
+                    thread_ts=payload["ts"],
+                    file=f.name,
+                    filename=f.name,
+                )
+
+        else:
+            steam = start_receiving_openai_response(
+                openai_api_key=openai_api_key,
+                model=context["OPENAI_MODEL"],
+                messages=messages,
+                user=context.user_id,
+            )
+            consume_openai_stream_to_write_reply(
+                client=client,
+                wip_reply=wip_reply,
+                context=context,
+                user_id=user_id,
+                messages=messages,
+                steam=steam,
+                timeout_seconds=OPENAI_TIMEOUT_SECONDS,
+                translate_markdown=TRANSLATE_MARKDOWN,
+            )
     except Timeout:
         if wip_reply is not None:
             text = (

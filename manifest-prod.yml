@@ -22,6 +22,7 @@ oauth_config:
       - mpim:history
       - chat:write
       - users:read
+      - files:write
 settings:
   event_subscriptions:
     request_url: https://TODO.amazonaws.com/slack/events
