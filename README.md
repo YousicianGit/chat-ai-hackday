@@ -1,4 +1,4 @@
-# ChatGPT Slack Bot
+# OpenAI Slack Bot
 ## The original README can be found below, here are instructions for our custom deployment.
 
 ## Development
